@@ -4,7 +4,7 @@ import './components/index.css';
 import Shop from './components/Shop';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './components/Home';
-import Admin from './components/admin';
+import Admin from './components/Admin';
 
 function App() {
   const [authToken, setAuthToken] = useState(localStorage.getItem('authToken')); 
