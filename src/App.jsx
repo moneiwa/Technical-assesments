@@ -10,7 +10,6 @@ function App() {
   const [authToken, setAuthToken] = useState(localStorage.getItem('authToken')); 
 
   useEffect(() => {
-    
     if (authToken) {
       localStorage.setItem('authToken', authToken);
     } else {
@@ -23,14 +22,10 @@ function App() {
       <Routes>
         <Route path="/auth" element={<Auth setAuthToken={setAuthToken} />} />
         
-        <Route
-          path="/"
-          element={authToken ? <Home /> : <Auth setAuthToken={setAuthToken} />}
-        />
-        
+    
+        <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Shop />} />
-        
-        <Route path="/admin" element={<Admin />} /> 
+        <Route path="/admin" element={authToken ? <Admin /> : <Auth setAuthToken={setAuthToken} />} />
       </Routes>
     </Router>
   );
