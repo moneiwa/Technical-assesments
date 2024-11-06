@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './components/Home';
@@ -31,17 +32,24 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         
-        {/* Protected Route for /shop */}
-        <Route
-          path="/shop"
-          element={
-            <ProtectedRoute authToken={authToken}>
-              <Shop />
-            </ProtectedRoute>
-          }
+    
+        <Route 
+          path="/shop" 
+          element={authToken ? <Navigate to="/cart" replace /> : <Shop authToken={authToken} />} 
         />
         
-        {/* Authentication route */}
+  
+        <Route 
+          path="/cart" 
+          element={
+            authToken ? (
+              <Shop authToken={authToken} />
+            ) : (
+              <Navigate to="/auth" replace />
+            )
+          } 
+        />
+        
         <Route path="/auth" element={<Auth setAuthToken={setAuthToken} />} />
       </Routes>
     </Router>
