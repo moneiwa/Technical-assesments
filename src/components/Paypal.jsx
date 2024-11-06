@@ -79,7 +79,7 @@ export default function Paypal({ amount }) {
     <div>
       {!showPayPal ? (
         <button onClick={() => { setShowPayPal(true); console.log("PayPal button shown"); }}>
-          Show PayPal Button
+          Pay with PayPal
         </button>
       ) : (
         <div ref={paypalRef} style={{ marginTop: '20px' }}></div>

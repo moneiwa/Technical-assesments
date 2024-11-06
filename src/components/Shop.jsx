@@ -1,42 +1,32 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom"; 
-import "./index.css";
+import axios from "axios";  
 import Paypal from './Paypal';
 
 function Shop() {
   const [products, setProducts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("kitchen"); 
-  const [loading, setLoading] = useState(false); 
-  const [error, setError] = useState(null); 
-  const [cart, setCart] = useState([]); 
-  const [searchQuery, setSearchQuery] = useState(""); 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [category, setCategory] = useState("kitchen"); 
+  const [searchQuery, setSearchQuery] = useState("");  
+  const [cart, setCart] = useState([]);  
+  const [totalAmount, setTotalAmount] = useState(0);  
+
+ 
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/categories/${category}/products`);
+      setProducts(response.data);
+    } catch (error) {
+      setError("Error fetching products");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true); 
-      setError(null); 
-      try {
-        const response = await fetch(
-          `http://localhost:8080/categories/${selectedCategory}/products`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch products");
-        }
-        const data = await response.json();
-        setProducts(data);
-      } catch (error) {
-        setError(error.message); 
-      } finally {
-        setLoading(false); 
-      }
-    };
-
+    setLoading(true);
     fetchProducts();
-  }, [selectedCategory]);
-
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  }, [category]);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat("en-US", {
@@ -45,75 +35,74 @@ function Shop() {
     }).format(price);
   };
 
+ 
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const addToCart = (product) => {
     setCart((prevCart) => {
-      const existingProductIndex = prevCart.findIndex(item => item.id === product.id);
-      if (existingProductIndex >= 0) {
-        const updatedCart = [...prevCart];
-        updatedCart[existingProductIndex].quantity += 1;
-        return updatedCart;
+     
+      const existingProduct = prevCart.find((item) => item.id === product.id);
+      if (existingProduct) {
+       
+        return prevCart.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
       } else {
+     
         return [...prevCart, { ...product, quantity: 1 }];
       }
     });
   };
 
   const removeFromCart = (productId) => {
-    setCart(prevCart => prevCart.filter(item => item.id !== productId));
+    setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
   };
 
-  const updateQuantity = (productId, newQuantity) => {
-    setCart(prevCart =>
-      prevCart.map(item =>
-        item.id === productId ? { ...item, quantity: newQuantity } : item
-      )
-    );
+  const cancelPaypalTransaction = () => {
+    setCart([]);
   };
 
-  const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
-  };
+  useEffect(() => {
+    const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    setTotalAmount(total);
+  }, [cart]);
 
   return (
     <div className="app">
       <header className="navbar">
-        <div className="menu-icon">☰</div>
-        <h1 className="title">Home-essentials</h1>
         <nav className="nav-links">
-          <Link to="/">HOME</Link> 
-          <Link to="/shop">SHOP</Link>
-          <Link to="/admin">Admin</Link>
-          <Link to="/auth"> 
-            <button className="shop-button">Logout</button>
-          </Link>
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input"
+          />
         </nav>
-
-      
-        <input
-          type="text"
-          placeholder="Search products..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="search-input"
-        />
       </header>
 
       <div className="category-buttons">
-        {['kitchen', 'bedroom', 'bathroom', 'decor'].map(category => (
+        {['kitchen', 'bedroom', 'bathroom', 'decor'].map((categoryType) => (
           <button
-            key={category}
-            onClick={() => setSelectedCategory(category)}
-            disabled={selectedCategory === category}
-            className={selectedCategory === category ? 'active' : ''}
+            key={categoryType}
+            onClick={() => setCategory(categoryType)}
+            disabled={category === categoryType}
+            className={category === categoryType ? "active" : ""}
           >
-            {category.charAt(0).toUpperCase() + category.slice(1)}
+            {categoryType.charAt(0).toUpperCase() + categoryType.slice(1)}
           </button>
         ))}
       </div>
 
+    
       {loading && <div className="loading">Loading products...</div>}
+
+      
       {error && <div className="error">{error}</div>}
 
+     
       <main className="product-grid">
         {filteredProducts.length === 0 && !loading && !error ? (
           <div className="no-products">No products available in this category.</div>
@@ -133,40 +122,35 @@ function Shop() {
         )}
       </main>
 
-      
       <div className="cart">
         <h2>Your Shopping Cart</h2>
-        {cart.length === 0 ? (
-          <p>Your cart is empty.</p>
-        ) : (
+        {cart.length > 0 ? (
           <div className="cart-items">
             {cart.map((item) => (
               <div className="cart-item" key={item.id}>
                 <img src={item.image} alt={item.name} className="cart-item-image" />
                 <div className="cart-item-info">
-                  <p>{item.name}</p>
-                  <p>{formatPrice(item.price)}</p>
-                  <div>
-                    <label>Quantity: </label>
-                    <input
-                      type="number"
-                      value={item.quantity}
-                      min="1"
-                      onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
-                    />
-                  </div>
-                  <button className="remove-from-cart" onClick={() => removeFromCart(item.id)}>
-                    Remove
-                  </button>
+                  <p>{item.name} x{item.quantity}</p>
+                  <p>{formatPrice(item.price * item.quantity)}</p>
                 </div>
+                <button className="remove-button" onClick={() => removeFromCart(item.id)}>
+                  Remove
+                </button>
               </div>
             ))}
-
-            <div className="paypal-section">
-              <p>Total: {formatPrice(getTotalPrice())}</p>
-              <Paypal total={getTotalPrice()} cart={cart} setCart={setCart} />
-            </div>
           </div>
+        ) : (
+          <p>No items in cart</p>
+        )}
+
+      
+        <div className="cart-total">
+          <h3>Total: {formatPrice(totalAmount)}</h3>
+        </div>
+
+     
+        {totalAmount > 0 && (
+          <Paypal totalAmount={totalAmount} cart={cart} cancelTransaction={cancelPaypalTransaction} />
         )}
       </div>
     </div>
