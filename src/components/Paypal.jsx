@@ -78,7 +78,7 @@ export default function Paypal({ amount }) {
   return (
     <div>
       {!showPayPal ? (
-        <button onClick={() => { setShowPayPal(true); console.log("PayPal button shown"); }}>
+        <button className='pay' onClick={() => { setShowPayPal(true); console.log("PayPal button shown"); }}>
           Pay with PayPal
         </button>
       ) : (

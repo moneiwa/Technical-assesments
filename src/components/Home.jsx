@@ -37,7 +37,7 @@ function Home() {
         </section>
 
         <section className="product">
-          <img src="five.jpg" alt="Cream Dispenser" loading="lazy" />
+          <img src="five.jpg" alt="Cream Dispenser" loading="lazy" />  </section>
           <div className="product-info">
             <span className="price">R150</span>
             <p>Cream Dispenser</p>
@@ -45,18 +45,18 @@ function Home() {
               <button className="view-button">View more</button>
             </Link>
           </div>
-        </section>
+      
 
         <section className="product">
-          <img src="six.webp" alt="Bedding" loading="lazy" />
+          <img src="one.jpg" alt="Bedding" loading="lazy" /> </section>
           <div className="product-info">
             <span className="price">R750</span>
-            <p>Bedding</p>
+            <p>Storage jar</p>
             <Link to="/shop">
               <button className="view-button">View more</button>
             </Link>
           </div>
-        </section>
+       
       </div>
     </div>
   );

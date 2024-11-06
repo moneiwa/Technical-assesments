@@ -1,39 +1,37 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import './index.css';
+import './index.css'; // Make sure this CSS file has the necessary styles
 
-function Navbar({ isLoggedIn, setIsLoggedIn }) {
-  const [menuOpen, setMenuOpen] = useState(false); 
+function Navbar({ authToken, setAuthToken }) {
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const toggleMenu = () => {
-    setMenuOpen(!menuOpen); 
+    setMenuOpen(!menuOpen);
+  };
+
+  const handleLogout = () => {
+    setAuthToken(null); 
+    localStorage.removeItem('authToken');
   };
 
   return (
     <nav className="navbar">
-      <button className="menu-button" onClick={toggleMenu}>&#9776;</button> 
+      <button className="menu-button" onClick={toggleMenu}>
+        &#9776;
+      </button>
       <h1 className="logo">Home-essentials</h1>
-      <div className={`nav-links ${menuOpen ? 'active' : ''}`}> 
-
-
-
-
+      <div className={`nav-links ${menuOpen ? 'active' : ''}`}>
         <Link to="/">Home</Link>
         <Link to="/shop">Shop</Link>
-        {isLoggedIn ? (
+
+        {/* Conditional rendering based on authToken */}
+        {authToken ? (
           <>
-            <Link to="/profile">Profile</Link>
-            <button className="shop-button" onClick={() => setIsLoggedIn(false)}>Logout</button>
+            <button className="logout-button" onClick={handleLogout}>Logout</button>
           </>
         ) : (
-          <Link to="/auth">Login</Link>
+          <Link to="/auth" className="login-button">Login</Link>
         )}
-        <Link to="/admin">Admin</Link>
-
-
-        <Link to="/auth">
-            <button className="shop-button">Logout</button>
-          </Link>
       </div>
     </nav>
   );
